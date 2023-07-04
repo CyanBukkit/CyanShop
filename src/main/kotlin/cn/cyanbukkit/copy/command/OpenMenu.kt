@@ -19,14 +19,14 @@ class OpenMenu(
         }
         if (p == null) {
             if (sender is Player) {
-                MenuListener.changeMenu(sender, CyanShop.allMenu[menuName]!!)
+                MenuListener.menuToInventory(sender, CyanShop.allMenu[menuName]!!)
                 return
             } else {
                 sender.sendMessage("§c你必须是玩家")
                 return
             }
         }
-        MenuListener.changeMenu(p, CyanShop.allMenu[menuName]!!)
+        MenuListener.menuToInventory(p, CyanShop.allMenu[menuName]!!)
     }
 
 

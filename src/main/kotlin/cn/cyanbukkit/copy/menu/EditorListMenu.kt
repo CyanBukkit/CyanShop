@@ -31,7 +31,6 @@ object EditorListMenu : Listener {
             p.sendMessage("§c此菜单没有物品")
             return
         }
-        Bukkit.getScheduler().cancelTask(CyanShop.instance.menuRunnableTask)
         p.openInventory(Bukkit.createInventory(null, 54, "§a编辑菜单...$menuName 的$mode"))
         when (mode) {
             "award" -> {
@@ -54,8 +53,6 @@ object EditorListMenu : Listener {
                     menuConfig.set("Items.$id.Award.Items", emptyList)
                     menuConfig.save(menu)
                     p.sendMessage("§a修改成功...耗时${System.currentTimeMillis() - now}ms")
-                    CyanShop.instance.menuRunnableTask =
-                        Bukkit.getScheduler().runTaskTimerAsynchronously(CyanShop.instance, SyncLoadMenu, 20, 20).taskId
                 }
 
             }
@@ -64,7 +61,6 @@ object EditorListMenu : Listener {
                 editingAction[p] = Consumer { inv ->
                     val now = System.currentTimeMillis()
                     Bukkit.getConsoleSender().sendMessage("§a编辑菜单....$menuName 的Price物品列表")
-                    menuConfig.set("Items", null)
                     val emptyList = mutableListOf<ItemStack>()
                     inv.forEach{ it ->
                         if (it != null) {
@@ -82,8 +78,6 @@ object EditorListMenu : Listener {
                     menuConfig.set("Items.$id.Price.Items", emptyList)
                     menuConfig.save(menu)
                     p.sendMessage("§a修改成功...耗时${System.currentTimeMillis() - now}ms")
-                    CyanShop.instance.menuRunnableTask =
-                        Bukkit.getScheduler().runTaskTimerAsynchronously(CyanShop.instance, SyncLoadMenu, 20, 20).taskId
                 }
             }
 

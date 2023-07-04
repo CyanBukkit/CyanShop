@@ -27,7 +27,6 @@ object CreateMenu : Listener {
             p.sendMessage("§c已存在此菜单")
             return
         }
-        Bukkit.getScheduler().cancelTask(CyanShop.instance.menuRunnableTask)
         val inv= Bukkit.createInventory(null, size * 9, menuName)
         editingAction[p] = Consumer { consumerInv ->
             val now = System.currentTimeMillis()
@@ -69,7 +68,6 @@ object CreateMenu : Listener {
             }
             menuConfig.save(menu)
             p.sendMessage("§a创建成功 耗时${System.currentTimeMillis() - now}ms")
-            CyanShop.instance.menuRunnableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(CyanShop.instance, SyncLoadMenu, 0, 20).taskId
         }
         p.openInventory(inv)
     }

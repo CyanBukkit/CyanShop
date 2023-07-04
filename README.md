@@ -25,3 +25,10 @@
 | `cs open <menu>` | 打开菜单        |
 
 
+
+## 制作人
+
+- [CyanBukkit]()
+- [ChatGPT]()(感谢3.5岁的GPT帮我把itemstack判定解决了)
+
+

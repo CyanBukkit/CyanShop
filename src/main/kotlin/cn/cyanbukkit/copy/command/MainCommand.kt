@@ -40,11 +40,14 @@ class MainCommand : Command(
                             "CyanShop.reload"))
                         return true
                     }
+                    val time = System.currentTimeMillis()
                     CyanShop.messageConfig = YamlConfiguration.loadConfiguration(CyanShop.instance.message)
                     CyanShop.npcDataConfig = YamlConfiguration.loadConfiguration(CyanShop.instance.npcData)
                     CyanShop.mainConfigConfig = YamlConfiguration.loadConfiguration(CyanShop.instance.mainConfig)
                     CyanShop.materialConfig = YamlConfiguration.loadConfiguration(CyanShop.instance.material)
-                    Bukkit.getConsoleSender().sendMessage("§a重载成功")
+                    p0.sendMessage("§a重载成功")
+                    p0.sendMessage("§a耗时${System.currentTimeMillis() - time}ms")
+                    return true
                 }
                 "saveTempItem" -> {
                     if (!p0.hasPermission("CyanShop.saveTempItem")) {

@@ -31,7 +31,6 @@ class CyanShop : JavaPlugin() {
     val npcData = File(dataFolder, "GlobalData.yml")
     val menuFolder = File(dataFolder, "Shop")
 
-    var menuRunnableTask : Int = 0
 
     override fun onEnable() {
         instance = this
@@ -67,7 +66,7 @@ class CyanShop : JavaPlugin() {
             menuFolder.mkdir()
         }
         // 启动实时加载菜单到Inventery
-        menuRunnableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, SyncLoadMenu, 0, 20).taskId
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, SyncLoadMenu, 0, 20)
         server.pluginManager.registerEvents(MenuListener, this)
         server.pluginManager.registerEvents(NPCListener, this)
         server.pluginManager.registerEvents(CreateMenu, this)

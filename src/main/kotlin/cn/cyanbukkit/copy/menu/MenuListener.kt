@@ -1,12 +1,7 @@
 package cn.cyanbukkit.copy.menu
 
 import cn.cyanbukkit.copy.CyanShop
-import cn.cyanbukkit.copy.menu.MenuListener.Papi
-import cn.cyanbukkit.copy.menu.MenuListener.check
-import cn.cyanbukkit.copy.menu.MenuListener.isTrue
-import cn.cyanbukkit.copy.menu.MenuListener.tran
 import me.clip.placeholderapi.PlaceholderAPI
-import net.minecraft.server.v1_15_R1.Items.im
 import net.minecraft.server.v1_15_R1.Items.it
 import org.black_ixx.playerpoints.PlayerPoints
 import org.black_ixx.playerpoints.PlayerPointsAPI
@@ -18,7 +13,6 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.scheduler.BukkitRunnable
 
 
@@ -27,12 +21,12 @@ object MenuListener : Listener {
     val openingMenuMap = mutableMapOf<Player, openingMenu>()
 
 
-    fun changeMenu(p: Player, menu: MenuData) {
+    fun menuToInventory(p: Player, menu: MenuData) {
         val newInventory = Bukkit.createInventory(null, menu.size * 9, menu.title)
         val taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(CyanShop.instance, Runnable {
             newInventory.clear()
             for (it in menu.items) {
-                val item = it.value.itemStack
+                val item = it.value.itemStack.clone()
                 if (item.type.isAir) continue
                 val im = item.itemMeta
                 im?.setDisplayName(PlaceholderAPI.setPlaceholders(p, im.displayName))
@@ -65,25 +59,58 @@ object MenuListener : Listener {
                 } else {
                     lore.add(p.Papi("§7➥ §c§l✘ §c点券: §e${it.value.pricePoint}"))
                 }
-
-                it.value.priceItems.forEach { thing ->
-                    try {
-                        if (p.inventory.contains(thing.type) && p.inventory.getItem(p.inventory.first(thing.type))!!.amount >= thing.amount) {
-                            lore.add(p.Papi("§7➥ §a§l√ §a${thing.itemMeta!!.displayName} x${thing.amount}"))
-                        } else {
-                            lore.add(p.Papi("§7➥ §c§l✘ §c${thing.itemMeta!!.displayName} x${thing.amount}"))
-                        }
-                    } catch (e: Exception) {
-                        lore.add(p.Papi("§7➥ §c§l✘ §c${thing.itemMeta!!.displayName} x${thing.amount}"))
+                // 解决不能识别RGB文字和 同一个物品显示很多行的问题
+                val allThings = mutableMapOf<ItemStack, Int>()
+                for (thing in it.value.priceItems) {
+                    if (allThings.containsKey(thing)) {
+                        allThings[thing] = allThings[thing]!! + thing.amount
+                    } else {
+                        allThings[thing] = thing.amount
                     }
                 }
+                val playerAllItems = mutableMapOf<ItemStack, Int>()
+                for (thing in p.inventory) {
+                    if (thing != null) {
+                        if (playerAllItems.containsKey(thing)) {
+                            playerAllItems[thing] = playerAllItems[thing]!! + thing.amount
+                        } else {
+                            playerAllItems[thing] = thing.amount
+                        }
+                    }
+                }
+
+
+                for (entry in allThings.entries) {
+                    val lI = entry.key
+                    val lIValue = entry.value
+
+                    val matchingItem = playerAllItems.keys.find { pItem ->
+                        lI.type == pItem.type && lI.itemMeta?.displayName == pItem.itemMeta?.displayName
+                    }
+
+                    if (matchingItem != null) {
+                        val pItemValue = playerAllItems[matchingItem] ?: 0
+                        if (lIValue <= pItemValue) {
+                            val str = p.Papi("§7➥ §a§l√ §a${lI.itemMeta?.displayName} §e${lIValue}")
+                            lore.add(str)
+                        } else {
+                            val str = p.Papi("§7➥ §c§l✘ §c${lI.itemMeta?.displayName} §e${lIValue} (数量少了你只有$pItemValue)")
+                            lore.add(str)
+                        }
+                    } else {
+                        val str = p.Papi("§7➥ §c§l✘ §c${lI.itemMeta?.displayName} §e${lIValue} (没有这个物品)")
+                        lore.add(str)
+                    }
+                }
+
+
                 im?.lore = lore
                 item.itemMeta = im
                 newInventory.setItem(it.key, item)
             }
-        }, 0, 1000).taskId
+        }, 0, 20).taskId
         p.openMenu(newInventory)
-        openingMenuMap[p] = openingMenu(menu, taskId)
+        openingMenuMap[p] = openingMenu(menu, taskId, newInventory)
     }
 
     /**
@@ -204,10 +231,11 @@ object MenuListener : Listener {
         val menu = openingMenuMap[p]!!
         // 点击判定执行指令
         if (e.currentItem == null) return
-        if (!menu.menuData.items.containsKey(e.slot)) return
         e.isCancelled = true
-        val item = menu.menuData.items[e.slot]!!
-        p.price(item)
+        if (e.clickedInventory != e.inventory) return
+        if (menu.menuData.items.containsKey(e.slot)) {
+            p.price(menu.menuData.items[e.slot]!!)
+        }
     }
 
     /**
@@ -241,21 +269,86 @@ object MenuListener : Listener {
             p.sendMessage("§c§l你的点券不足")
             return
         }
-        item.priceItems.forEach {
-            if (!p.inventory.contains(it.type)) {
-                p.sendMessage("§c§l你的物品不足")
+//        item.priceItems.forEach { it ->
+//            val itemType = it.type
+//            val itemAmount = it.amount
+//
+//            if (!p.inventory.contains(itemType)) {
+//                p.sendMessage("§c§l你的背包里没有这个物品")
+//                return
+//            }
+//
+//            val itemStack = p.inventory.getItem(p.inventory.first(itemType))
+//            if (itemStack == null || itemStack.amount < itemAmount) {
+//                p.sendMessage("§c§l你的物品不足")
+//                return
+//            }
+//
+//            val itemMeta = itemStack.itemMeta
+//            if (itemMeta == null || itemMeta.displayName != it.itemMeta?.displayName) {
+//                p.sendMessage("§c§l物品属性不匹配")
+//                return
+//            }
+//
+//            // 物品存在于背包中且数量足够，从玩家背包中移除物品
+//            p.inventory.removeItem(itemStack)
+//        }
+        val allThings = mutableMapOf<ItemStack, Int>()
+        for (thing in item.priceItems) {
+            if (allThings.containsKey(thing)) {
+                allThings[thing] = allThings[thing]!! + thing.amount
+            } else {
+                allThings[thing] = thing.amount
+            }
+        }
+        val playerAllItems = mutableMapOf<ItemStack, Int>()
+        for (thing in p.inventory) {
+            if (thing != null) {
+                if (playerAllItems.containsKey(thing)) {
+                    playerAllItems[thing] = playerAllItems[thing]!! + thing.amount
+                } else {
+                    playerAllItems[thing] = thing.amount
+                }
+            }
+        }
+        for (entry in allThings.entries) {
+            val lI = entry.key
+            val lIValue = entry.value
+
+            val matchingItem = playerAllItems.keys.find { pItem ->
+                lI.type == pItem.type && lI.itemMeta?.displayName == pItem.itemMeta?.displayName
+            }
+            val pItemValue = playerAllItems[matchingItem] ?: 0
+            if (matchingItem == null) {
+                p.sendMessage("§c§l你没有带够这些物品")
                 return
             }
-            if (p.inventory.getItem(p.inventory.first(it.type))!!.amount < it.amount) {
+            if (lIValue > pItemValue) {
                 p.sendMessage("§c§l你的物品不足")
                 return
             }
         }
+        allThings.forEach { (t, u) ->
+            // 根据allThings的物品进行在玩家p背包中的物品数量减少 不要用while
+            var u1 = u
+            for (thing in p.inventory) {
+                if (thing != null) {
+                    if (thing.type == t.type && thing.itemMeta?.displayName == t.itemMeta?.displayName) {
+                        if (thing.amount >= u1) {
+                            thing.amount = thing.amount - u1
+                            u1 = 0
+                            break
+                        } else {
+                            u1 -= thing.amount
+                            thing.amount = 0
+                        }
+                    }
+                }
+            }
+        }
+        p.updateInventory() // 更新玩家背包显示
         CyanShop.econ!!.withdrawPlayer(p, item.priceMoney.toDouble())
         PlayerPointsAPI(PlayerPoints.getInstance()).take(p.uniqueId, item.pricePoint)
-        item.priceItems.forEach {
-            p.inventory.removeItem(ItemStack(it.type, it.amount))
-        }
         // exp take
         p.level = p.level - item.priceExp
         // Award
@@ -299,6 +392,7 @@ object MenuListener : Listener {
     data class openingMenu(
         val menuData: MenuData,
         val task: Int,
+        val inventory: Inventory
     )
 
 

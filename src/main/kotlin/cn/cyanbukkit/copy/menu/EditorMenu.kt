@@ -24,7 +24,6 @@ object EditorMenu : Listener {
             p.sendMessage("§c不存在此菜单")
             return
         }
-        Bukkit.getScheduler().cancelTask(CyanShop.instance.menuRunnableTask)
         edit(p, CyanShop.allMenu[menuName]!!)
         editingAction[p] = Consumer { inv ->
             val now = System.currentTimeMillis()
@@ -65,7 +64,6 @@ object EditorMenu : Listener {
             }
             menuConfig.save(menu)
             p.sendMessage("§a修改成功...耗时${System.currentTimeMillis() - now}ms")
-            CyanShop.instance.menuRunnableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(CyanShop.instance, SyncLoadMenu, 20, 20).taskId
         }
     }
 
