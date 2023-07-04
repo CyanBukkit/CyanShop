@@ -1,0 +1,12 @@
+无权限: '§c缺少权限 §e<Prem>'
+非玩家: '§e此命令只有玩家能执行'
+帮助:
+    - '§4§lCyanShop 青桶首个《自研》商店 官方售价500元菜单插件 §8- §7帮助'
+    - '  §8➥ §b/CyanShop Open <Name> [Player] §7打开菜单'
+    - '  §8➥ §b/CyanShop NPC <Id> <Name> §7为NPC绑定菜单'
+    - '  §8➥ §b/CyanShop New <Name> <Size> §7创建菜单'
+    - '  §8➥ §b/CyanShop remove <Name> confirm §7删除菜单'
+    - '  §8➥ §b/CyanShop edit <Name> §7编辑菜单'
+    - '  §8➥ §b/CyanShop editPriceItem <Name> <id> §7编辑消耗物品菜单'
+    - '  §8➥ §b/CyanShop editAwardItem <Name> <id>  §7编辑兑换物品菜单'
+    - '  §8➥ §b/CyanShop Reload §7重载配置文件'
