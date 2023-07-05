@@ -31,17 +31,23 @@ object EditorListMenu : Listener {
             p.sendMessage("§c此菜单没有物品")
             return
         }
-        p.openInventory(Bukkit.createInventory(null, 54, "§a编辑菜单...$menuName 的$mode"))
+        val aInv = Bukkit.createInventory(null, 54, "§a编辑菜单...$menuName 的$mode")
+        p.openInventory(aInv)
         when (mode) {
             "award" -> {
+                menuConfig.get("Items.$id.Award.Items")?.let { it1 ->
+                    ItemSerialize.itemStackListDeserialize(it1).forEach {
+                        aInv.addItem(it)
+                    }
+                }
                 editingAction[p] = Consumer { inv ->
                     val now = System.currentTimeMillis()
-                    Bukkit.getConsoleSender().sendMessage("§a编辑菜单....$menuName 的award物品列表")
+                    Bukkit.getConsoleSender().sendMessage("§a${p} 编辑菜单....$menuName 的award物品列表")
                     val emptyList = mutableListOf<ItemStack>()
                     for (it in inv) {
                         if (it != null) {
                             val itemMeta = it.itemMeta
-                            if (itemMeta?.hasDisplayName() == false)  {
+                            if (itemMeta?.hasDisplayName() == false) {
                                 itemMeta.setDisplayName(
                                     CyanShop.materialConfig.getString(it.type.name) ?: it.type.name
                                 )
@@ -58,15 +64,20 @@ object EditorListMenu : Listener {
             }
 
             "price" -> {
+                menuConfig.get("Items.$id.Price.Items")?.let { it1 ->
+                    ItemSerialize.itemStackListDeserialize(it1).forEach {
+                        aInv.addItem(it)
+                    }
+                }
                 editingAction[p] = Consumer { inv ->
                     val now = System.currentTimeMillis()
-                    Bukkit.getConsoleSender().sendMessage("§a编辑菜单....$menuName 的Price物品列表")
+                    Bukkit.getConsoleSender().sendMessage("§a${p} 编辑菜单....$menuName 的Price物品列表")
                     val emptyList = mutableListOf<ItemStack>()
-                    inv.forEach{ it ->
+                    inv.forEach { it ->
                         if (it != null) {
                             if (it.type.isAir) return@forEach
                             val itemMeta = it.itemMeta
-                            if (itemMeta?.hasDisplayName() == false)  {
+                            if (itemMeta?.hasDisplayName() == false) {
                                 itemMeta.setDisplayName(
                                     CyanShop.materialConfig.getString(it.type.name) ?: it.type.name
                                 )

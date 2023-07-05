@@ -269,30 +269,6 @@ object MenuListener : Listener {
             p.sendMessage("§c§l你的点券不足")
             return
         }
-//        item.priceItems.forEach { it ->
-//            val itemType = it.type
-//            val itemAmount = it.amount
-//
-//            if (!p.inventory.contains(itemType)) {
-//                p.sendMessage("§c§l你的背包里没有这个物品")
-//                return
-//            }
-//
-//            val itemStack = p.inventory.getItem(p.inventory.first(itemType))
-//            if (itemStack == null || itemStack.amount < itemAmount) {
-//                p.sendMessage("§c§l你的物品不足")
-//                return
-//            }
-//
-//            val itemMeta = itemStack.itemMeta
-//            if (itemMeta == null || itemMeta.displayName != it.itemMeta?.displayName) {
-//                p.sendMessage("§c§l物品属性不匹配")
-//                return
-//            }
-//
-//            // 物品存在于背包中且数量足够，从玩家背包中移除物品
-//            p.inventory.removeItem(itemStack)
-//        }
         val allThings = mutableMapOf<ItemStack, Int>()
         for (thing in item.priceItems) {
             if (allThings.containsKey(thing)) {

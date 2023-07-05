@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -17,6 +18,7 @@ import java.util.function.Consumer
 
 object EditorMenu : Listener {
     private val editingAction: MutableMap<Player, Consumer<Inventory>> = mutableMapOf()
+    private val editingMenu: MutableMap<Player, String> = mutableMapOf()
 
     fun init(p: Player, menuName: String) {
         val menu = File(CyanShop.instance.menuFolder, "$menuName.yml")
@@ -24,6 +26,7 @@ object EditorMenu : Listener {
             p.sendMessage("§c不存在此菜单")
             return
         }
+        editingMenu[p] = menuName
         edit(p, CyanShop.allMenu[menuName]!!)
         editingAction[p] = Consumer { inv ->
             val now = System.currentTimeMillis()
@@ -77,10 +80,38 @@ object EditorMenu : Listener {
     }
 
     @EventHandler
+    fun onLeft(e: InventoryClickEvent) {
+        if (editingAction.containsKey(e.whoClicked as Player)) {
+            if (e.currentItem == null || e.currentItem?.type?.isAir ?: return) return
+            if (e.clickedInventory == e.whoClicked.inventory) return
+            val item = e.slot
+            if (e.isLeftClick) {
+                val p = e.whoClicked as Player
+                val slot = e.slot
+                e.isCancelled = true
+                p.closeInventory()
+                EditorListMenu.init(p, editingMenu[p]!!, "price", slot)
+            }
+            if (e.isLeftClick && e.isShiftClick) {
+                val p = e.whoClicked as Player
+                val slot = e.slot
+                e.isCancelled = true
+                editingAction[p]?.accept(e.inventory)
+                editingAction.remove(p)
+                editingMenu.remove(p)
+                EditorListMenu.init(p, editingMenu[p]!!, "award", slot)
+            }
+        }
+    }
+
+
+
+    @EventHandler
     fun onMenuClick(e: InventoryCloseEvent) {
         if (editingAction.containsKey(e.player)) {
             editingAction[e.player]?.accept(e.inventory)
             editingAction.remove(e.player)
+            editingMenu.remove(e.player)
         }
     }
 
