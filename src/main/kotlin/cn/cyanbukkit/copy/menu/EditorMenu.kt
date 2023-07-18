@@ -84,22 +84,21 @@ object EditorMenu : Listener {
         if (editingAction.containsKey(e.whoClicked as Player)) {
             if (e.currentItem == null ) return
             if (e.clickedInventory == e.whoClicked.inventory) return
-            val item = e.slot
-            if (e.isLeftClick) {
-                e.isCancelled = true
-                val p = e.whoClicked as Player
-                val slot = e.slot
-                EditorListMenu.init(p, editingMenu[p]!!, "price", slot)
-                editingAction[p]?.accept(e.inventory)
-                editingAction.remove(p)
-                editingMenu.remove(p)
-            }
+            val slot = e.slot
             if (e.isLeftClick && e.isShiftClick) {
                 e.isCancelled = true
                 val p = e.whoClicked as Player
-                val slot = e.slot
-                EditorListMenu.init(p, editingMenu[p]!!, "award", slot)
                 editingAction[p]?.accept(e.inventory)
+                EditorListMenu.init(p, editingMenu[p]!!, "award", slot)
+                editingAction.remove(p)
+                editingMenu.remove(p)
+                return
+            }
+            if (e.isLeftClick) {
+                e.isCancelled = true
+                val p = e.whoClicked as Player
+                editingAction[p]?.accept(e.inventory)
+                EditorListMenu.init(p, editingMenu[p]!!, "price", slot)
                 editingAction.remove(p)
                 editingMenu.remove(p)
             }

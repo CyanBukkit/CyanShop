@@ -1,6 +1,7 @@
 package cn.cyanbukkit.copy.menu
 
 import cn.cyanbukkit.copy.CyanShop
+import cn.cyanbukkit.copy.CyanShop.Companion.translateColor
 import me.clip.placeholderapi.PlaceholderAPI
 import org.black_ixx.playerpoints.PlayerPoints
 import org.black_ixx.playerpoints.PlayerPointsAPI
@@ -13,50 +14,51 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
+import java.util.function.Consumer
 
 
 object MenuListener : Listener {
 
-    val openingMenuMap = mutableMapOf<Player, openingMenu>()
+    private val openingMenuMap = mutableMapOf<Player, OpeningMenu>()
 
+    private val refreshConsumers = mutableMapOf<Player, Consumer<ConsumerData>>()
 
-    fun menuToInventory(p: Player, menu: MenuData) {
-        val newInventory = Bukkit.createInventory(null, menu.size * 9, menu.title)
-        val taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(CyanShop.instance, Runnable {
-            newInventory.clear()
-            for (it in menu.items) {
+    fun menuToInventory(player: Player, menu: MenuData) {
+        refreshConsumers[player] = Consumer { data ->
+            data.inventory.clear()
+            for (it in data.menuData.items) {
                 val item = it.value.itemStack.clone()
-                if (item.type.isAir) continue
+//                if (item.type.isAir) continue
                 val im = item.itemMeta
-                im?.setDisplayName(PlaceholderAPI.setPlaceholders(p, im.displayName))
+                im?.setDisplayName(PlaceholderAPI.setPlaceholders(player, im.displayName))
                 val lore = if (im?.hasLore() == true) {
-                    PlaceholderAPI.setPlaceholders(p, im.lore!!.tran() )
+                    PlaceholderAPI.setPlaceholders(player, im.lore!!.tran() )
                 } else {
                     mutableListOf()
                 }
-                lore.add(p.Papi("§5条件:"))
+                lore.add(player.papi("§5条件:"))
                 it.value.condition.forEach {
                     try {
-                        lore.add(p.Papi(it.check()))
+                        lore.add(player.papi(it.check()))
                     } catch (e: Exception) {
-                        lore.add(p.Papi("§c${it} §4§l[条件错误]"))
+                        lore.add(player.papi("§c${it} §4§l[条件错误]"))
                     }
                 }
-                lore.add(p.Papi("§5花费:"))
-                if (p.exp >= it.value.priceExp) {
-                    lore.add(p.Papi("§7➥ §a§l√ §a经验: §e${it.value.priceExp}"))
+                lore.add(player.papi("§5花费:"))
+                if (player.exp >= it.value.priceExp) {
+                    lore.add(player.papi("§7➥ §a§l√ §a经验: §e${it.value.priceExp}"))
                 } else {
-                    lore.add(p.Papi("§7➥ §c§l✘ §c经验: §e${it.value.priceExp}"))
+                    lore.add(player.papi("§7➥ §c§l✘ §c经验: §e${it.value.priceExp}"))
                 }
-                if (CyanShop.econ!!.getBalance(p) >= it.value.priceMoney) {
-                    lore.add(p.Papi("§7➥ §a§l√ §a金币: §e${it.value.priceMoney}"))
+                if (CyanShop.econ!!.getBalance(player) >= it.value.priceMoney) {
+                    lore.add(player.papi("§7➥ §a§l√ §a金币: §e${it.value.priceMoney}"))
                 } else {
-                    lore.add(p.Papi("§7➥ §c§l✘ §c金币: §e${it.value.priceMoney}"))
+                    lore.add(player.papi("§7➥ §c§l✘ §c金币: §e${it.value.priceMoney}"))
                 }
-                if(PlayerPointsAPI(PlayerPoints.getInstance()).look(p.uniqueId) >= it.value.pricePoint) {
-                    lore.add(p.Papi("§7➥ §a§l√ §a点券: §e${it.value.pricePoint}"))
+                if(PlayerPointsAPI(PlayerPoints.getInstance()).look(player.uniqueId) >= it.value.pricePoint) {
+                    lore.add(player.papi("§7➥ §a§l√ §a点券: §e${it.value.pricePoint}"))
                 } else {
-                    lore.add(p.Papi("§7➥ §c§l✘ §c点券: §e${it.value.pricePoint}"))
+                    lore.add(player.papi("§7➥ §c§l✘ §c点券: §e${it.value.pricePoint}"))
                 }
                 // 解决不能识别RGB文字和 同一个物品显示很多行的问题
                 val allThings = mutableMapOf<ItemStack, Int>()
@@ -68,7 +70,7 @@ object MenuListener : Listener {
                     }
                 }
                 val playerAllItems = mutableMapOf<ItemStack, Int>()
-                for (thing in p.inventory) {
+                for (thing in player.inventory) {
                     if (thing != null) {
                         if (playerAllItems.containsKey(thing)) {
                             playerAllItems[thing] = playerAllItems[thing]!! + thing.amount
@@ -90,14 +92,14 @@ object MenuListener : Listener {
                     if (matchingItem != null) {
                         val pItemValue = playerAllItems[matchingItem] ?: 0
                         if (lIValue <= pItemValue) {
-                            val str = p.Papi("§7➥ §a§l√ §a${lI.itemMeta?.displayName} §e${lIValue}")
+                            val str = player.papi("§7➥ §a§l√ §a${lI.itemMeta?.displayName} §e${lIValue}")
                             lore.add(str)
                         } else {
-                            val str = p.Papi("§7➥ §c§l✘ §c${lI.itemMeta?.displayName} §e${lIValue} (数量少了你只有$pItemValue)")
+                            val str = player.papi("§7➥ §c§l✘ §c${lI.itemMeta?.displayName} §e${lIValue} (数量少了你只有$pItemValue)")
                             lore.add(str)
                         }
                     } else {
-                        val str = p.Papi("§7➥ §c§l✘ §c${lI.itemMeta?.displayName} §e${lIValue} (没有这个物品)")
+                        val str = player.papi("§7➥ §c§l✘ §c${lI.itemMeta?.displayName} §e${lIValue} (没有这个物品)")
                         lore.add(str)
                     }
                 }
@@ -105,11 +107,17 @@ object MenuListener : Listener {
 
                 im?.lore = lore
                 item.itemMeta = im
-                newInventory.setItem(it.key, item)
+                data.inventory.setItem(it.key, item)
             }
-        }, 0, 20).taskId
-        p.openMenu(newInventory)
-        openingMenuMap[p] = openingMenu(menu, taskId, newInventory)
+        }
+
+        val newInventory = Bukkit.createInventory(null, menu.size * 9, menu.title.translateColor())
+        val cData = ConsumerData(menu, newInventory)
+        val taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(CyanShop.instance, Runnable {
+            refreshConsumers[player]?.accept(cData)
+        }, 0, 60).taskId
+        player.openMenu(newInventory)
+        openingMenuMap[player] = OpeningMenu(menu, taskId, newInventory, cData)
     }
 
     /**
@@ -203,7 +211,7 @@ object MenuListener : Listener {
         return list
     }
 
-    private fun Player.Papi(s: String): String {
+    private fun Player.papi(s: String): String {
         return PlaceholderAPI.setPlaceholders(this, s)
     }
 
@@ -242,8 +250,6 @@ object MenuListener : Listener {
      */
     private fun Player.price(item: Item) {
         val p = this
-        //
-        // exp
         item.condition.forEach {
             if (it == "") return@forEach
             try {
@@ -331,10 +337,10 @@ object MenuListener : Listener {
             p.inventory.addItem(it)
         }
         item.awardPlayerCMD.forEach {
-            Bukkit.dispatchCommand(p, p.Papi(it))
+            Bukkit.dispatchCommand(p, p.papi(it))
         }
         item.awardGlobalCMD.forEach {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), p.Papi(it))
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), p.papi(it))
         }
         if (item.awardExp != 0) {
             p.giveExp(item.awardExp)
@@ -347,6 +353,8 @@ object MenuListener : Listener {
         }
         if(item.awardClose){
             p.closeInventory()
+        } else {
+            refreshConsumers[player]?.accept(openingMenuMap[p]!!.data)
         }
     }
 
@@ -361,15 +369,20 @@ object MenuListener : Listener {
             Bukkit.getScheduler().cancelTask(menu.task)
         }
         openingMenuMap.remove(p)
+        refreshConsumers.remove(p)
     }
 
 
-    data class openingMenu(
+    data class OpeningMenu(
         val menuData: MenuData,
         val task: Int,
-        val inventory: Inventory
+        val inventory: Inventory,
+        val data : ConsumerData
     )
 
-
+    data class ConsumerData (
+        val menuData: MenuData,
+        val inventory: Inventory// 用于更新背包
+    )
 
 }
