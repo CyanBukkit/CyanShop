@@ -2,8 +2,6 @@ package cn.cyanbukkit.copy.menu
 
 import cn.cyanbukkit.copy.CyanShop
 import net.citizensnpcs.api.gui.InventoryMenu
-import net.minecraft.server.v1_15_R1.Items
-import net.minecraft.server.v1_15_R1.Items.it
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
@@ -43,7 +41,10 @@ object EditorListMenu : Listener {
                 editingAction[p] = Consumer { inv ->
                     val now = System.currentTimeMillis()
                     Bukkit.getConsoleSender().sendMessage("§a${p} 编辑菜单....$menuName 的award物品列表")
-                    val emptyList = mutableListOf<ItemStack>()
+
+                    val emptyStringList = mutableListOf<String>()
+                    val emptyItemStackList = mutableListOf<ItemStack>()
+
                     for (it in inv) {
                         if (it != null) {
                             val itemMeta = it.itemMeta
@@ -53,10 +54,10 @@ object EditorListMenu : Listener {
                                 )
                             }
                             it.itemMeta = itemMeta
-                            emptyList.add(it)
+                            emptyItemStackList.add(it)
                         }
                     }
-                    menuConfig.set("Items.$id.Award.Items", emptyList)
+                    menuConfig.set("Items.$id.Award.Items", emptyItemStackList)
                     menuConfig.save(menu)
                     p.sendMessage("§a修改成功...耗时${System.currentTimeMillis() - now}ms")
                 }
@@ -75,7 +76,7 @@ object EditorListMenu : Listener {
                     val emptyList = mutableListOf<ItemStack>()
                     inv.forEach { it ->
                         if (it != null) {
-                            if (it.type.isAir) return@forEach
+//                            if (it.type.isAir) return@forEach
                             val itemMeta = it.itemMeta
                             if (itemMeta?.hasDisplayName() == false) {
                                 itemMeta.setDisplayName(

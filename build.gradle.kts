@@ -12,7 +12,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.spigotmc:spigot:1.15")
+    // spigotmc
+    compileOnly("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
     // placeholderapi
     compileOnly("me.clip:placeholderapi:2.11.3")
     //
@@ -27,7 +28,7 @@ dependencies {
 }
 
 
-version = "1.1.1"
+version = "1.1.2"
 
 kotlin {
     jvmToolchain(8)

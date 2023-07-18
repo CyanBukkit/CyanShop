@@ -8,6 +8,6 @@ depend:
   - CYANKOTLINLOADER
   - PlaceholderAPI
 permissions:
-  CyanShop.admin:
+  CyanShop.+:
       description: CyanShop admin permission
       default: op

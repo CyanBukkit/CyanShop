@@ -1,7 +1,6 @@
 package cn.cyanbukkit.copy.menu
 
 import cn.cyanbukkit.copy.CyanShop
-import net.minecraft.server.v1_15_R1.Items.it
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration

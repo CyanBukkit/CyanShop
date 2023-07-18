@@ -2,7 +2,6 @@ package cn.cyanbukkit.copy.menu
 
 import cn.cyanbukkit.copy.CyanShop
 import me.clip.placeholderapi.PlaceholderAPI
-import net.minecraft.server.v1_15_R1.Items.it
 import org.black_ixx.playerpoints.PlayerPoints
 import org.black_ixx.playerpoints.PlayerPointsAPI
 import org.bukkit.Bukkit

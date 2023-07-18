@@ -1,7 +1,6 @@
 package cn.cyanbukkit.copy.menu
 
 import cn.cyanbukkit.copy.CyanShop
-import net.minecraft.server.v1_15_R1.Items.it
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
@@ -35,7 +34,7 @@ object EditorMenu : Listener {
             menuConfig.set("Items", null)
             for (index in 0 until inv.size) {
                 val item = inv.getItem(index) ?: continue
-                if (item.type.isAir) continue
+//                if (item.type.isAir) continue
                 val itemMeta = item.itemMeta
                 if (itemMeta?.hasDisplayName() == false)  {
                     itemMeta.setDisplayName(
@@ -43,22 +42,23 @@ object EditorMenu : Listener {
                     )
                 }
                 item.itemMeta = itemMeta
-                val emptyList = mutableListOf<ItemStack>()
+                val emptyStringList = mutableListOf<String>()
+                val emptyItemStackList = mutableListOf<ItemStack>()
                 menuConfig.set("Items.$index.ItemStack", item)
-                menuConfig.set("Items.$index.Condition", emptyList)
+                menuConfig.set("Items.$index.Condition", emptyStringList)
                 menuConfig.set("Items.$index.PlayerAmount", -1)
                 menuConfig.set("Items.$index.GlobalAmount", -1)
-                menuConfig.set("Items.$index.Price.PlayerCMD", emptyList)
-                menuConfig.set("Items.$index.Price.ConsoleCMD", emptyList)
-                menuConfig.set("Items.$index.Price.Items", emptyList)
+                menuConfig.set("Items.$index.Price.PlayerCMD", emptyStringList)
+                menuConfig.set("Items.$index.Price.ConsoleCMD", emptyStringList)
+                menuConfig.set("Items.$index.Price.Items", emptyItemStackList)
                 menuConfig.set("Items.$index.Price.Close", false)
                 menuConfig.set("Items.$index.Price.Exp", 0)
                 menuConfig.set("Items.$index.Price.Money", 0)
                 menuConfig.set("Items.$index.Price.Point", 0)
                 menuConfig.set("Items.$index.Price.RMB", 0)
-                menuConfig.set("Items.$index.Award.PlayerCMD", emptyList)
-                menuConfig.set("Items.$index.Award.ConsoleCMD", emptyList)
-                menuConfig.set("Items.$index.Award.Items", emptyList)
+                menuConfig.set("Items.$index.Award.PlayerCMD", emptyStringList)
+                menuConfig.set("Items.$index.Award.ConsoleCMD", emptyStringList)
+                menuConfig.set("Items.$index.Award.Items", emptyItemStackList)
                 menuConfig.set("Items.$index.Award.Close", false)
                 menuConfig.set("Items.$index.Award.Exp", 0)
                 menuConfig.set("Items.$index.Award.Money", 0)
@@ -82,24 +82,26 @@ object EditorMenu : Listener {
     @EventHandler
     fun onLeft(e: InventoryClickEvent) {
         if (editingAction.containsKey(e.whoClicked as Player)) {
-            if (e.currentItem == null || e.currentItem?.type?.isAir ?: return) return
+            if (e.currentItem == null ) return
             if (e.clickedInventory == e.whoClicked.inventory) return
             val item = e.slot
             if (e.isLeftClick) {
+                e.isCancelled = true
                 val p = e.whoClicked as Player
                 val slot = e.slot
-                e.isCancelled = true
-                p.closeInventory()
                 EditorListMenu.init(p, editingMenu[p]!!, "price", slot)
-            }
-            if (e.isLeftClick && e.isShiftClick) {
-                val p = e.whoClicked as Player
-                val slot = e.slot
-                e.isCancelled = true
                 editingAction[p]?.accept(e.inventory)
                 editingAction.remove(p)
                 editingMenu.remove(p)
+            }
+            if (e.isLeftClick && e.isShiftClick) {
+                e.isCancelled = true
+                val p = e.whoClicked as Player
+                val slot = e.slot
                 EditorListMenu.init(p, editingMenu[p]!!, "award", slot)
+                editingAction[p]?.accept(e.inventory)
+                editingAction.remove(p)
+                editingMenu.remove(p)
             }
         }
     }

@@ -1,15 +1,19 @@
+@file:Suppress("SpellCheckingInspection")
+
 package cn.cyanbukkit.copy.command
 
 import cn.cyanbukkit.copy.CyanShop
+import cn.cyanbukkit.copy.CyanShop.Companion.translateColor
 import cn.cyanbukkit.copy.menu.DeleteMenu
 import cn.cyanbukkit.copy.menu.EditorMenu
 import cn.cyanbukkit.copy.menu.ItemSerialize
-import org.bukkit.Bukkit
+import com.cryptomorin.xseries.XItemStack
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.awt.TextComponent
 
 class MainCommand : Command(
     "CyanShop",
@@ -34,7 +38,7 @@ class MainCommand : Command(
         }
         if (p2.size == 1) {
             when (p2[0]) {
-                "Reload" -> {
+                "reload" -> {
                     if (!p0.hasPermission("CyanShop.reload")) {
                         p0.sendMessage(noPerm.replace("<Prem>",
                             "CyanShop.reload"))
@@ -42,17 +46,31 @@ class MainCommand : Command(
                     }
                     val time = System.currentTimeMillis()
                     CyanShop.messageConfig = YamlConfiguration.loadConfiguration(CyanShop.instance.message)
-                    CyanShop.npcDataConfig = YamlConfiguration.loadConfiguration(CyanShop.instance.npcData)
                     CyanShop.mainConfigConfig = YamlConfiguration.loadConfiguration(CyanShop.instance.mainConfig)
                     CyanShop.materialConfig = YamlConfiguration.loadConfiguration(CyanShop.instance.material)
                     p0.sendMessage("§a重载成功")
                     p0.sendMessage("§a耗时${System.currentTimeMillis() - time}ms")
                     return true
                 }
-                "saveTempItem" -> {
-                    if (!p0.hasPermission("CyanShop.saveTempItem")) {
+                "list" -> {
+                    if (!p0.hasPermission("CyanShop.list")) {
                         p0.sendMessage(noPerm.replace("<Prem>",
-                            "CyanShop.saveTempItem"))
+                            "CyanShop.list"))
+                        return true
+                    }
+                    p0.sendMessage("§a当前已有的商店:")
+                    CyanShop.allMenu.forEach {
+                        // 弄个textcomponent
+                        val text = net.md_5.bungee.api.chat.TextComponent(it.key)
+                        text.clickEvent = net.md_5.bungee.api.chat.ClickEvent(net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND, "/CyanShop open ${it.key}")
+                        p0.spigot().sendMessage(text)
+                    }
+                    return true
+                }
+                "savetempitem" -> {
+                    if (!p0.hasPermission("CyanShop.savetempitem")) {
+                        p0.sendMessage(noPerm.replace("<Prem>",
+                            "CyanShop.savetempitem"))
                         return true
                     }
                     val item = mutableListOf<ItemStack>()
@@ -78,10 +96,10 @@ class MainCommand : Command(
                     }
                     p0.sendMessage("§a执行测试")
                 }
-                "saveTempItemSimple" -> {
-                    if (!p0.hasPermission("CyanShop.test")) {
+                "savetempitemsimple" -> {
+                    if (!p0.hasPermission("CyanShop.savetempitemsimple")) {
                         p0.sendMessage(noPerm.replace("<Prem>",
-                            "CyanShop.test"))
+                            "CyanShop.savetempitemsimple"))
                         return true
                     }
                     val item = p0.inventory.itemInMainHand
@@ -99,7 +117,7 @@ class MainCommand : Command(
                     } else {
                         p0.sendMessage("§c手上没有物品")
                     }
-                    
+
                 }
             }
         }
@@ -107,6 +125,20 @@ class MainCommand : Command(
             when (p2[0]) {
                 "open" -> {
                     OpenMenu(p0,null, p2[1]).init()
+                    return true
+                }
+                "setdisplayname" -> {
+                    if (!p0.hasPermission("CyanShop.setdisplayname")) {
+                        p0.sendMessage(noPerm.replace("<Prem>",
+                            "CyanShop.setdisplayname"))
+                        return true
+                    }
+                    val item = p0.inventory.itemInMainHand
+                    val Iit = XItemStack.serialize(item)
+                    val itemMeta = item.itemMeta
+                    itemMeta?.setDisplayName(p2[1].translateColor())
+                    item.itemMeta = itemMeta
+                    p0.sendMessage("§a设置成功")
                     return true
                 }
                 "edit" -> {
@@ -164,7 +196,7 @@ class MainCommand : Command(
                     DeleteMenu.init(p2[1], p0)
                     return true
                 }
-                "editPriceItem" -> {
+                "editpriceitem" -> {
                     if (!p0.hasPermission("CyanShop.editPriceItem")) {
                         p0.sendMessage(noPerm.replace("<Prem>",
                             "CyanShop.editPriceItem"))
@@ -173,7 +205,35 @@ class MainCommand : Command(
                     Editor(p0, p2[1], p2[2].toInt(), "price").init()
                     return true
                 }
-                "editAwardItem" -> {
+                "setlore" -> {
+                    // /cs setlore <index> <lore> 如果输入的行数超出手里物品的lore行数则自动设置在新行
+                    if (!p0.hasPermission("CyanShop.setLore")) {
+                        p0.sendMessage(noPerm.replace("<Prem>",
+                            "CyanShop.setLore"))
+                        return true
+                    }
+                    // 如果<index>输入的不是数字 就sendmessage
+                    if (!p2[1].isInt()) {
+                        p0.sendMessage("§c请输入数字")
+                        return true
+                    }
+                    val item = p0.inventory.itemInMainHand
+                    val itemMeta = item.itemMeta
+                    val lore = itemMeta?.lore
+                    if (lore == null) {
+                        itemMeta?.lore = mutableListOf(p2[1])
+                    } else {
+                        if (p2[1].toInt() > lore.size) {
+                            lore.add(p2[2].translateColor())
+                        } else {
+                            lore[p2[1].toInt()] = p2[2].translateColor()
+                        }
+                        itemMeta.lore = lore
+                    }
+                    item.itemMeta = itemMeta
+                    p0.sendMessage("§a设置成功")
+                }
+                "editawarditem" -> {
                     if (!p0.hasPermission("CyanShop.editAwardItem")) {
                         p0.sendMessage(noPerm.replace("<Prem>",
                             "CyanShop.editAwardItem"))
@@ -205,11 +265,14 @@ class MainCommand : Command(
                 "edit",
                 "npc",
                 "new",
-                "Reload",
-                "editPriceItem",
-                "editAwardItem",
-                "saveTempItem",
+                "reload",
+                "editpriceitem",
+                "editawarditem",
+                "savetempitem",
                 "remove",
+                "setlore",
+                "setdisplayname",
+                "list",
             )
         }
         if (args.size == 2) {
@@ -242,5 +305,14 @@ class MainCommand : Command(
             }
         }
         return mutableListOf()
+    }
+}
+
+private fun String.isInt(): Boolean {
+    return try {
+        this.toInt()
+        true
+    } catch (e: Exception) {
+        false
     }
 }
