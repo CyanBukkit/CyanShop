@@ -23,12 +23,10 @@ dependencies {
     // implementation File XSeries-9.4.0.jar in root
     implementation(files("XSeries-9.4.0.jar"))
 
-
-
 }
 
 
-version = "1.1.2"
+version = "1.2"
 
 kotlin {
     jvmToolchain(8)

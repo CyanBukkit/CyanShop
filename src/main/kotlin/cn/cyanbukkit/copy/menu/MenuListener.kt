@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryInteractEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
@@ -215,6 +216,13 @@ object MenuListener : Listener {
         return PlaceholderAPI.setPlaceholders(this, s)
     }
 
+    @EventHandler
+    fun onInto(e : InventoryInteractEvent) {
+        if (e.whoClicked !is Player) return
+        val p = e.whoClicked as Player
+        if (!openingMenuMap.containsKey(p)) return
+        e.isCancelled = true
+    }
 
     private fun Player.openMenu(menu: Inventory) {
         val p = this
@@ -316,7 +324,7 @@ object MenuListener : Listener {
                 if (thing != null) {
                     if (thing.type == t.type && thing.itemMeta?.displayName == t.itemMeta?.displayName) {
                         if (thing.amount >= u1) {
-                            thing.amount = thing.amount - u1
+                            thing.amount -= u1
                             u1 = 0
                             break
                         } else {
@@ -331,7 +339,7 @@ object MenuListener : Listener {
         CyanShop.econ!!.withdrawPlayer(p, item.priceMoney.toDouble())
         PlayerPointsAPI(PlayerPoints.getInstance()).take(p.uniqueId, item.pricePoint)
         // exp take
-        p.level = p.level - item.priceExp
+        p.level -= item.priceExp
         // Award
         item.awardItems.forEach {
             p.inventory.addItem(it)

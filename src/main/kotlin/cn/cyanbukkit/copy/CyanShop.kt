@@ -107,11 +107,14 @@ class CyanShop : JavaPlugin() {
         // 注册指令
         MainCommand().register()
         server.consoleSender.sendMessage("§b[CyanBukkit™]§fCyanShop插件加载完成")
-        server.consoleSender.sendMessage("§b[CyanBukkit™]§f插件作者：海口瑞鸿网络科技工作室 CyanBukkit （我的世界青桶社区全网联名） ")
+        server.consoleSender.sendMessage("§b[CyanBukkit™]§f插件作者：瑞鸿网络科技工作室 CyanBukkit （我的世界青桶社区全网联名） ")
     }
 
     override fun onDisable() {
-        logger.info("CyanShop disabled")
+        // 关闭已经打开界面的用户
+        for (player in Bukkit.getOnlinePlayers()) {
+            player.closeInventory()
+        }
     }
     fun getEconomy(): Economy? {
         return econ
@@ -123,6 +126,8 @@ class CyanShop : JavaPlugin() {
         val commandMap = field.get(instance.server.pluginManager) as SimpleCommandMap
         commandMap.register("CyanShop", this)
     }
+
+
 
 
     private fun setupEconomy(): Boolean {
