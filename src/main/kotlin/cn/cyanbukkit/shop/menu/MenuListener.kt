@@ -185,7 +185,7 @@ object MenuListener : Listener {
 
     private fun String.isTrue(): Boolean {
         if (this == "") return false
-        val x = this.split("||")
+        val x = this.split("||").map { it.trim() }
         when (x[1]) {
             ">=" -> {
                 return x[0].toInt() >= x[2].toInt()
