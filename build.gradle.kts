@@ -2,7 +2,7 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 import org.jetbrains.kotlin.storage.CacheResetOnProcessCanceled.enabled
 
 val group = "cn.cyanbukkit.shop" // 先更改这里
-version = "1.2.1"
+version = "1.2.2"
 
 bukkit {
     name = rootProject.name // 设置插件的名字 已设置跟随项目名
