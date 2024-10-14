@@ -1,7 +1,7 @@
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 import org.jetbrains.kotlin.storage.CacheResetOnProcessCanceled.enabled
 
-val group = " cn.cyanbukkit.shop" // 先更改这里
+val group = "cn.cyanbukkit.shop" // 先更改这里
 version = "1.2.1"
 
 bukkit {
