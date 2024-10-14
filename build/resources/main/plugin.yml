@@ -1,13 +1,16 @@
-﻿name: CyanShop
-version: 1.1.2
-main: cn.cyanbukkit.copy.CyanShop
+name: CyanShop
+version: "0.1"
+main: ' cn.cyanbukkit.shop.cyanlib.launcher.CyanPluginLauncher'
+description: An example plugin for CyanBukkit
+authors:
+  - Your Name
+website: https://cyanbukkit.cn
 depend:
   - Citizens
   - Vault
   - PlayerPoints
-  - CYANKOTLINLOADER
   - PlaceholderAPI
 permissions:
   CyanShop.+:
-      description: CyanShop admin permission
-      default: op
+    description: Cyan Shop permissions.
+    default: op
