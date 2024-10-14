@@ -88,7 +88,12 @@ object MenuListener : Listener {
                     val lIValue = entry.value
 
                     val matchingItem = playerAllItems.keys.find { pItem ->
-                        lI.type == pItem.type && lI.itemMeta?.displayName == pItem.itemMeta?.displayName
+                        lI.type == pItem.type && lI.itemMeta?.displayName == ( if (pItem.itemMeta?.hasDisplayName() == true) {
+                            // 因为在物品放在分别器上物品名字会因为替换后不识别 所以导致不一致 现在改成它对应的物品
+                            pItem.itemMeta?.displayName
+                        } else {
+                            CyanShop.materialConfig.getString(pItem.type.name) ?: pItem.type.name
+                        } )
                     }
 
                     if (matchingItem != null) {
@@ -291,6 +296,7 @@ object MenuListener : Listener {
                 allThings[thing] = thing.amount
             }
         }
+        // 玩家拥有的所有物品
         val playerAllItems = mutableMapOf<ItemStack, Int>()
         for (thing in p.inventory) {
             if (thing != null) {
@@ -306,7 +312,12 @@ object MenuListener : Listener {
             val lIValue = entry.value
 
             val matchingItem = playerAllItems.keys.find { pItem ->
-                lI.type == pItem.type && lI.itemMeta?.displayName == pItem.itemMeta?.displayName
+                lI.type == pItem.type && lI.itemMeta?.displayName == ( if (pItem.itemMeta?.hasDisplayName() == true) {
+                    // 因为在物品放在分别器上物品名字会因为替换后不识别 所以导致不一致 现在改成它对应的物品
+                    pItem.itemMeta?.displayName
+                } else {
+                    CyanShop.materialConfig.getString(pItem.type.name) ?: pItem.type.name
+                } )
             }
             val pItemValue = playerAllItems[matchingItem] ?: 0
             if (matchingItem == null) {
@@ -322,20 +333,30 @@ object MenuListener : Listener {
             // 根据allThings的物品进行在玩家p背包中的物品数量减少 不要用while
             var u1 = u
             for (thing in p.inventory) {
-                if (thing != null) {
-                    if (thing.type == t.type && thing.itemMeta?.displayName == t.itemMeta?.displayName) {
-                        if (thing.amount >= u1) {
-                            thing.amount -= u1
-                            u1 = 0
-                            break
-                        } else {
-                            u1 -= thing.amount
-                            thing.amount = 0
+                if (thing != null  && t.type == thing.type
+                    && t.itemMeta?.displayName == ( if (thing.itemMeta?.hasDisplayName() == true) {
+                        thing.itemMeta?.displayName
+                    } else {// 因为在物品放在分别器上物品名字会因为替换后不识别 所以导致不一致 现在改成它对应的物品
+                        CyanShop.materialConfig.getString(thing.type.name) ?: thing.type.name
+                    } )) {
+                    p.sendMessage("§a正在移除...${u} 个 ${t.itemMeta?.displayName} ")
+                    if (thing.amount >= u1) {
+                        thing.amount -= u1
+                        // 如果物品数量减到零，移除该物品
+                        if (thing.amount == 0) {
+                            p.inventory.remove(thing) // 从玩家背包中移除物品
                         }
+                        break
+                    } else {
+                        u1 -= thing.amount
+                        thing.amount = 0
+                        p.inventory.remove(thing) // 从玩家背包中移除物品
                     }
                 }
             }
         }
+
+
         p.updateInventory() // 更新玩家背包显示
         CyanShop.econ!!.withdrawPlayer(p, item.priceMoney.toDouble())
         PlayerPointsAPI(PlayerPoints.getInstance()).take(p.uniqueId, item.pricePoint)

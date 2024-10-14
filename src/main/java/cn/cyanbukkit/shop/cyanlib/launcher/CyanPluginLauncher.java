@@ -21,12 +21,12 @@ public class CyanPluginLauncher extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        cyanPlugin.onEnable();
+        CyanShop.INSTANCE.onEnable();
     }
 
     @Override
     public void onDisable() {
-        cyanPlugin.onDisable();
+        CyanShop.INSTANCE.onDisable();
     }
 
 
