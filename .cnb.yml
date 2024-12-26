@@ -25,11 +25,27 @@
 #           script:
 #             - docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT}
 # 分支名
-master:
+main:
   # 事件名
   push:
-    # 要执行的任务
-    - stages:
-        - name: echo
-          script: echo "hello world"
+    - docker: # 任务名
+        image: gradle:8.8-jdk8
+        volumes:
+          - /root/.gradle:copy-on-write
+      services:
+        - docker
+      stages:
+        - name: 编译
+          script:
+            - ./gradlew clean build
+            - ls
+        - name: docker login
+          script:
+            - docker login -u ${CNB_TOKEN_USER_NAME} -p "${CNB_TOKEN}" ${CNB_DOCKER_REGISTRY}
+        - name: docker build
+          script:
+            - docker build -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT} .
+        - name: docker push
+          script:
+            - docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT}
 
