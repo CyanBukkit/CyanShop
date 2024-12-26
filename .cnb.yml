@@ -37,10 +37,9 @@ master:
       stages:
         - name: 编译
           script:
+            - chmod +x gradlew
             - ls -l gradlew
-            # - chmod +x gradlew
-            # - ./gradlew clean build
-            # - ls
+            - ./gradlew clean build
         # - name: docker login
         #   script:
         #     - docker login -u ${CNB_TOKEN_USER_NAME} -p "${CNB_TOKEN}" ${CNB_DOCKER_REGISTRY}
