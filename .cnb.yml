@@ -25,7 +25,7 @@
 #           script:
 #             - docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT}
 # 分支名
-main:
+master:
   # 事件名
   push:
     - docker: # 任务名
