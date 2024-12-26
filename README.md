@@ -37,6 +37,12 @@
 - [ChatGPT]()(感谢3.5岁的GPT帮我把itemstack判定解决了)
 
 
+
+
+
+[![](http://oss-00001.swordsman.com.cn:6333/picture/long-ad.png)](https://awacode.top/lyxy)
+
+
 ## 版本更新 
 
 
