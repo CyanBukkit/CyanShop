@@ -40,7 +40,7 @@
 
 
 
-[![](http://oss-00001.swordsman.com.cn:6333/picture/long-ad.png)](https://awacode.top/lyxy)
+[![](45769d4b80ecd809d7c17982a76f2b17.jpg)](https://awacode.top/lyxy)
 
 
 ## 版本更新 
