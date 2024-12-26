@@ -37,6 +37,8 @@ master:
       stages:
         - name: 编译
           script:
+            - ll
+            - chmod +x gradlew
             - ./gradlew clean build
             - ls
         - name: docker login
