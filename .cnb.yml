@@ -1,25 +1,35 @@
+# main:
+#   push:
+#     - docker:
+#         # 声明式的构建环境 https://docs.cnb.cool/
+#         # 可以去dockerhub https://hub.docker.com/_/gradle 找到您需要的gradle和jdk版本
+#         image: gradle:8.8-jdk8
+#         volumes:
+#           # 声明式的构建缓存 https://docs.cnb.cool/zh/grammar/pipeline.html#volumes
+#           - /root/.gradle:copy-on-write
+#       services:
+#         # 流水线中启用 docker 服务
+#         - docker
+#       stages:
+#         - name: gradle build
+#           script:
+#             - ./gradlew clean build
+#             - ls
+#         - name: docker login
+#           script:
+#             - docker login -u ${CNB_TOKEN_USER_NAME} -p "${CNB_TOKEN}" ${CNB_DOCKER_REGISTRY}
+#         - name: docker build
+#           script:
+#             - docker build -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT} .
+#         - name: docker push
+#           script:
+#             - docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT}
+# 分支名
 main:
+  # 事件名
   push:
-    - docker:
-        # 声明式的构建环境 https://docs.cnb.cool/
-        # 可以去dockerhub https://hub.docker.com/_/gradle 找到您需要的gradle和jdk版本
-        image: gradle:8.8-jdk8
-        volumes:
-          # 声明式的构建缓存 https://docs.cnb.cool/zh/grammar/pipeline.html#volumes
-          - /root/.gradle:copy-on-write
-      services:
-        # 流水线中启用 docker 服务
-        - docker
-      stages:
-        - name: gradle build
-          script:
-            - ./gradlew clean build
-        - name: docker login
-          script:
-            - docker login -u ${CNB_TOKEN_USER_NAME} -p "${CNB_TOKEN}" ${CNB_DOCKER_REGISTRY}
-        - name: docker build
-          script:
-            - docker build -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT} .
-        - name: docker push
-          script:
-            - docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT}
+    # 要执行的任务
+    - stages:
+        - name: echo
+          script: echo "hello world"
+
