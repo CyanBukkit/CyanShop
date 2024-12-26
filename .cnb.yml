@@ -14,7 +14,6 @@ main:
         - name: gradle build
           script:
             - ./gradlew clean build
-        # 云原生构建自动构建Docker镜像并将它发布到制品库参考【上传Docker制品】https://docs.cnb.cool/zh/artifact/docker.html
         - name: docker login
           script:
             - docker login -u ${CNB_TOKEN_USER_NAME} -p "${CNB_TOKEN}" ${CNB_DOCKER_REGISTRY}
