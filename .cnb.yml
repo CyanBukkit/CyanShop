@@ -3,7 +3,7 @@ main:
     - docker:
         # 声明式的构建环境 https://docs.cnb.cool/
         # 可以去dockerhub https://hub.docker.com/_/gradle 找到您需要的gradle和jdk版本
-        image: gradle:6.8-jdk8
+        image: gradle:8.8-jdk8
         volumes:
           # 声明式的构建缓存 https://docs.cnb.cool/zh/grammar/pipeline.html#volumes
           - /root/.gradle:copy-on-write
